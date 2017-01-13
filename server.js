@@ -16,6 +16,12 @@ var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
     process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-quickstart.json';
 
+app.all('*', function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
 
 
 app.get('/messages', function(req, res){
@@ -30,7 +36,7 @@ app.get('/messages', function(req, res){
     authorize(JSON.parse(content), function(auth) {
       listMessage(auth, function(messages){
         console.log('fini');
-        res.json(JSON.stringify(messages, null, 3));
+        res.json((messages));
         res.end();
       });
 
