@@ -11,6 +11,8 @@ var app = new express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// NOTATION: Est-ce que tu pourras documenter dans le code en commentaire comment on
+// fait pour faire fonctionner le backend ?
 
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/gmail-nodejs-quickstart.json
@@ -238,6 +240,7 @@ function listMessage(auth, callback) {
     var messages = [];
     messageIds.forEach(function(elementId){
       getMessage(elementId, auth, function(message){
+// NOTATION: Tu peux enlever les console.log puisque on a débugguer et que cela marche maintenant
         console.log('message', i, messageIds.length);
         messages.push(message)
         i++;
