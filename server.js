@@ -4,8 +4,11 @@ var fs = require('fs');
 var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
+var oauth2Client,
+    clientCode;
 
 var app = new express();
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 
@@ -15,6 +18,7 @@ var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
     process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-quickstart.json';
+var CLIENT_ID;
 
 app.all('*', function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
@@ -31,9 +35,11 @@ app.get('/messages', function(req, res){
       console.log('Error loading client secret file: ' + err);
       return;
     }
+
     // Authorize a client with the loaded credentials, then call the
     // Gmail API.
-    authorize(JSON.parse(content), function(auth) {
+    authorize(JSON.parse(content), clientCode, function(auth) {
+      console.log(auth);
       listMessage(auth, function(messages){
         console.log('fini');
         res.json((messages));
@@ -45,6 +51,27 @@ app.get('/messages', function(req, res){
 
 
 });
+
+app.post('/tokensignin', function(req, res) {
+  var auth = new googleAuth;
+  var client = new auth.OAuth2(CLIENT_ID, '', '');
+  client.verifyIdToken(
+    req.body.id_token,
+    CLIENT_ID,
+
+    function(e, login) {
+      var payload = login.getPayload();
+      var userid = payload['sub'];
+      console.log(userid);
+
+    });
+});
+
+app.post('/code', function(req, res) {
+  clientCode = req.body.code;
+  res.end();
+});
+
 
 app.listen(44444);
 
@@ -58,13 +85,24 @@ app.listen(44444);
  * @param {Object} credentials The authorization client credentials.
  * @param {function} callback The callback to call with the authorized client.
  */
-function authorize(credentials, callback) {
+function authorize(credentials, code, callback) {
   var clientSecret = credentials.installed.client_secret;
   var clientId = credentials.installed.client_id;
+  var CLIENT_ID = credentials.installed.client_id;
   var redirectUrl = credentials.installed.redirect_uris[0];
   var auth = new googleAuth();
   var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
+  oauth2Client.getToken(code, function(err, token) {
+    if (err) {
+      console.log('Error while trying to retrieve access token', err);
+      return;
+    }
+    oauth2Client.credentials = token;
+    callback(oauth2Client);
+  });
+
+    /*
   // Check if we have previously stored a token.
   fs.readFile(TOKEN_PATH, function(err, token) {
     if (err) {
@@ -73,7 +111,11 @@ function authorize(credentials, callback) {
       oauth2Client.credentials = JSON.parse(token);
       callback(oauth2Client);
     }
+
   });
+  */
+
+
 }
 
 /**
@@ -187,6 +229,7 @@ function listMessage(auth, callback) {
   gmail.users.messages.list({
     'userId': 'me',
   }, function (err, result) {
+    console.log(err);
     messageIds = result.messages.map(function(e){
       return e.id;
     });

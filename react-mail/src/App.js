@@ -4,6 +4,7 @@ import './assets/css/App.css';
 
 
 function getMessagesList(){
+  /*
   fetch('http://localhost:44444/messages')
   .then(function(response){
     return response.json();
@@ -11,7 +12,9 @@ function getMessagesList(){
   .then(function(messages){
     console.log(messages);
   });
+  */
 }
+
 
 class MessagesList extends Component {
   render() {
@@ -26,7 +29,7 @@ class MailApp extends Component {
   render() {
     return (
       <div className="mail-app">
-
+        <button id="googleSignIn">Sign-in with google</button>
         <MessagesList />
       </div>
     );
