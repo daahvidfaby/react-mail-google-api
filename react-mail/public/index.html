@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="google-signin-client_id" content="345060820385-47vun4i0fkrel82j4c9b73dkgep33p8j.apps.googleusercontent.com">
     <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     <!--
       Notice the use of %PUBLIC_URL% in the tag above.
@@ -29,79 +28,11 @@
       To create a production bundle, use `npm run build`.
     -->
 
-    <!--
+    <script src="https://apis.google.com/js/client:platform.js" async defer></script>
+
     <script>
-      window.onload = function() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'http://localhost:44444/getauthurl');
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.onload = function() {
-          //window.location.href = xhr.responseText;
-        };
-        xhr.send();
-      };
-
-      console.log(location.search);
-    </script>
-  -->
-
-
-    <script src="https://apis.google.com/js/client:platform.js?onload=renderButton" async defer></script>
-
-    <!--
-    <script>
-    function onSuccess(googleUser) {
-      console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
-    }
-    function onFailure(error) {
-      console.log(error);
-    }
-    function renderButton() {
-      gapi.signin2.render('my-signin2', {
-        'scope': 'profile email',
-        'width': 240,
-        'height': 50,
-        'longtitle': true,
-        'theme': 'dark',
-        'onsuccess': onSignIn,
-        'onfailure': onFailure
-      });
-    }
-  </script>
-
--->
-    <script>
-      function onSignIn(googleUser) {
-
+      function onSignIn() {
         auth2.grantOfflineAccess({'redirect_uri': 'postmessage'}).then(signInCallback);
-
-        /*
-        var profile = googleUser.getBasicProfile();
-        var id_token = googleUser.getAuthResponse().id_token;
-        console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-        console.log('Name: ' + profile.getName());
-        console.log('Image URL: ' + profile.getImageUrl());
-        console.log('Email: ' + profile.getEmail());
-        console.log(profile);
-        console.log(gapi);
-        console.log(id_token);
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'http://localhost:44444/tokensignin');
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.onload = function() {
-          console.log(xhr.responseText);
-        };
-        xhr.send('id_token=' + id_token);
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token='+ id_token);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.onload = function() {
-          console.log('Signed in as: ' + xhr.responseText);
-        };
-        xhr.send('idtoken=' + id_token);
-        */
       }
 
       function signInCallback(authResult) {
@@ -132,9 +63,6 @@
             console.log('User signed out.');
           });
         }
-    </script>
-
-    <script>
 
     function start() {
 
@@ -146,7 +74,7 @@
         auth2 = gapi.auth2.init({
           client_id: '345060820385-47vun4i0fkrel82j4c9b73dkgep33p8j.apps.googleusercontent.com',
           scope: 'https://mail.google.com/'
-          
+
         });
       });
       var signinButton = document.getElementById('googleSignIn');
@@ -154,5 +82,6 @@
     }
 
   </script>
+
   </body>
 </html>
