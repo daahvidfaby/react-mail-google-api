@@ -1,27 +1,37 @@
 import React, { Component } from 'react';
 import { Router, Route } from '../node_modules/react-router';
 
-//import logo from './logo.svg';
 import './assets/css/App.css';
 
 function getMessagesList(){
-  /*
-  fetch('http://localhost:44444/messages')
+  // NOTATION: Je t'ai corrigé ce code pour que cela fonctionne
+  return fetch('http://localhost:44444/messages')
   .then(function(response){
     return response.json();
   })
-  .then(function(messages){
-    console.log(messages);
-  });
-  */
 }
 
-
+// NOTATION: Je t'ai aidé un peu sur ce bout de code pour les promesses.
+// NOTATION: On va voir les promesses ensemble au prochain cours, mais si tu veux
+// te renseigner un peu, je te conseille cet article qui m'a permis de comprendre
+// à quoi servent les promesses : http://andyshora.com/promises-angularjs-explained-as-cartoon.html
+// un autre article intéressant qui explique pourquoi les promesses sont si cool :
+// https://gist.github.com/domenic/3889970
+// Il y a aussi la spécification https://www.promisejs.org/
 class MessagesList extends Component {
+  constructor() {
+      this.state = {
+          messages: [],
+      }
+  }
+  componentDidMount() {
+    getMessagesList().then((messages) => {
+        this.setState({messages: messages});
+    })
+  }
   render() {
-    const messagesList = getMessagesList();
     return (
-      <div>{messagesList}</div>
+      <div>{messages.length}</div>
     );
   }
 }
