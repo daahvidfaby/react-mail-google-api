@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 import { Router, Route, browserHistory } from '../node_modules/react-router';
+// import Moment from 'react-moment';
+var moment = require('moment');
+import 'moment/locale/fr';
+moment.locale('fr');
 import logo from './logo.svg';
 import './App.css';
 import './assets/js/gapi';
@@ -39,10 +43,18 @@ class GoogleSign extends Component {
 }
 
 class MessageLine extends Component {
+  formatDate(dateString) {
+    let date = new Date(dateString);
+    let formattedDate = moment(date.getTime()).format('D MMM');
+    console.log(formattedDate);
+    return formattedDate;
+  }
   render() {
     return (
       <tr className="messageLine">
-          <td>{this.props.headers.from}</td>
+          <td>{this.props.headers.from.name}</td>
+          <td>{this.props.headers.subject}</td>
+          <td>{this.formatDate(this.props.headers.date)}</td>
       </tr>
     );
   }
@@ -95,7 +107,14 @@ class MessagesList extends Component {
     return messagesObjects.map(function(messageObject) {
       const formattedMessage = messageObject;
       formattedMessage.headers = messageObject.payload.headers.reduce(function(messageHeaders, header) {
-        messageHeaders[header.name.toLowerCase()] = header.value;
+        if(header.name === 'From') {
+          let value = header.value.split(' <');
+          messageHeaders[header.name.toLowerCase()] = [];
+          messageHeaders.from.name = value[0];
+          messageHeaders.from.email = '<' + value[1];
+        } else {
+          messageHeaders[header.name.toLowerCase()] = header.value;
+        }
         return messageHeaders;
       }, {});
       return formattedMessage;
