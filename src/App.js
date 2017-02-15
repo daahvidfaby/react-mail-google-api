@@ -25,9 +25,20 @@ function handleAuthClick(event) {
   gapi.auth2.getAuthInstance().signIn();
 }
 function updateSigninStatus(isSignedIn) {
+  // if (isSignedIn) {
+  //   browserHistory.push('/inbox');
+  //   console.log('logged in');
+  // } else {
+  //   browserHistory.push('/');
+  //   console.log('logged out');
+  // }
   if (isSignedIn) {
-    browserHistory.push('/inbox');
     console.log('logged in');
+    console.log(browserHistory.getCurrentLocation());
+    if(browserHistory.getCurrentLocation().pathname === '/') {
+      console.log('signin');
+      browserHistory.push('/list/inbox');
+    }
   } else {
     browserHistory.push('/');
     console.log('logged out');
@@ -68,7 +79,7 @@ class MessagesList extends Component {
       }
   }
   componentDidMount() {
-    this.getInbox().then((messages) => {
+    this.getMessagesList(this.props.params.listType).then((messages) => {
       console.log(messages);
       this.setState({messages: messages});
       console.log(this.state);
@@ -120,8 +131,8 @@ class MessagesList extends Component {
       return formattedMessage;
     });
   }
-  getInbox() {
-    return this.getMessagesIds('INBOX', 20)
+  getMessagesList(listType) {
+    return this.getMessagesIds(listType.toUpperCase(), 20)
     .then((messagesIds) => {
         return this.getMessages(messagesIds);
     })
@@ -133,7 +144,7 @@ class MessagesList extends Component {
     return (
       <section>
         <h2>Messages</h2>
-          <table className="messageTable">
+          <table className="messages-table highlight responsive-table bordered">
             <tbody>
               {this.displayMessages()}
             </tbody>
@@ -177,9 +188,20 @@ class MailApp extends Component {
       return null;
     }
     return (
-      <div className="mail-app">
-        {this.props.children}
-      </div>
+      <main className="main-layout">
+        <nav>
+          <div className="nav-wrapper">
+            <a href="#" className="brand-logo">Logo</a>
+            <ul id="nav-mobile" className="right hide-on-med-and-down">
+              <li><a href="/list/inbox">Messages reçus</a></li>
+              <li><a href="/list/sent">Messages envoyés</a></li>
+            </ul>
+          </div>
+        </nav>
+        <div className="mail-app">
+          {this.props.children}
+        </div>
+      </main>
     );
   }
 }
@@ -188,7 +210,7 @@ const Routes = (props) => (
   <Router {...props}>
     <Route component={MailApp} >
       <Route path="/" component={GoogleSign} />
-      <Route path="/inbox" component={MessagesList} />
+      <Route path="/list/:listType" component={MessagesList} />
     </Route>
   </Router>
 );
