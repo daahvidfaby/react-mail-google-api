@@ -53,11 +53,93 @@ class Message extends Component {
   constructor() {
     super();
 
+    this.state = {
+      message : {},
+      messageLoaded: false
+    }
+  }
+  componentDidMount() {
+    this.getMessage(this.props.params.messageId)
+    .then((messageObject) => {
+      return this.formatMessageObject(messageObject);
+    })
+    .then((formattedMessage) => {
+      this.setState({message: formattedMessage, messageLoaded: true});
+    });
+  }
+  getMessage(messagesId) {
+    return gapi.client.gmail.users.messages.get({
+      'userId': 'me',
+      'id': messagesId,
+    })
+    .then(messageResult => {
+      return messageResult.result;
+    });
+  }
+  formatMessageObject(messageObject) {
+      const formattedMessage = messageObject;
+      formattedMessage.headers = messageObject.payload.headers.reduce(function(messageHeaders, header) {
+        messageHeaders[header.name.toLowerCase()] = header.value;
+        return messageHeaders;
+      }, {});
+      return formattedMessage;
+  }
+  getSender() {
+    let value = this.state.message.headers.from.split(' <');
+    let sender = {};
+    sender.name = value[0];
+    sender.email = '<' + value[1];
+    return sender;
+  }
+  getMessageContent() {
+    let htmlContent;
+    if(this.state.message.payload.body.size === 0){
+      htmlContent = this.b64DecodeUnicode(this.state.message.payload.parts[0].body.data.replace(/-/g, '+').replace(/_/g, '/'));
+    } else {
+      htmlContent = this.b64DecodeUnicode(this.state.message.payload.body.data.replace(/-/g, '+').replace(/_/g, '/'));
+    }
+    return htmlContent;
+  }
+  b64DecodeUnicode(str) {
+    return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
   }
   render() {
-    console.log(this.props);
+    if(!this.state.messageLoaded) {
+      return null;
+    }
     return (
-        <div>hello world</div>
+      <main className="Message">
+        <div className="Message-actions">
+          <button type="button" name="back" className="Messages-actions-back Button action" onClick={browserHistory.goBack}>Retour</button>
+        </div>
+        <div className="MessageContainer">
+          <div className="MessageContainer-header">
+            <div className="MessageContainer-header-top">
+              <div className="Sender">
+                <div className="Sender-name">
+                  {this.getSender().name}
+                </div>
+                <div className="Sender-email">
+                  {this.getSender().email}
+                </div>
+              </div>
+              <div className="ReplyTo">
+                <button type="button" name="button" className="ReplyTo-button Button">Reply to</button>
+              </div>
+            </div>
+          </div>
+          <div className="MessageContainer-header-bottom">
+            <div className="Subject">
+              {this.state.message.headers.subject}
+            </div>
+          </div>
+          <div className="MessageContainer-content">
+            {this.getMessageContent()}
+          </div>
+        </div>
+      </main>
     );
   }
 }
@@ -119,9 +201,8 @@ class MessagesList extends Component {
     }
   }
   displayMessagesList() {
-    let that = this;
     var messageLines = this.state.messages.map(function(message, index) {
-      return <Link to={'/message/'+ index} key={index}><MessageLine {...message} key={message.id} /></Link>;
+      return <Link to={'/message/'+ message.id} key={index}><MessageLine {...message} key={message.id} /></Link>;
     });
     return messageLines;
   }
@@ -140,7 +221,8 @@ class MessagesList extends Component {
       messagesIds.result.messages.map(function(message) {
         return gapi.client.gmail.users.messages.get({
           'userId': 'me',
-          'id': message.id
+          'id': message.id,
+          'format': 'metadata'
         }).then(function(messages) {
           return messages.result;
         })
@@ -225,13 +307,9 @@ class MailCategories extends Component {
 
 class HeadingToolbar extends Component {
   render() {
-    return (
-      <section className="HeadingToolbar Wrapper">
-        <div className="AppColumn left">
-          <button type="button" name="button" className="HeadingToolbar-composeEmail Button action">
-            Compose
-          </button>
-        </div>
+    var headingToolbarMain;
+    if(this.props.headingToolbarType === 'list') {
+      headingToolbarMain =
         <div className="HeadingToolbar-column AppColumn main row">
           <div className="HeadingToolbar-selectAll">
             <input type="checkbox" name="SelectAll" />
@@ -247,7 +325,18 @@ class HeadingToolbar extends Component {
               <a href="#" className="PagingNav-next">&gt;</a>
             </nav>
           </div>
+        </div>;
+    }
+
+    console.log(this.props);
+    return (
+      <section className="HeadingToolbar Wrapper">
+        <div className="AppColumn left">
+          <button type="button" name="button" className="HeadingToolbar-composeEmail Button action">
+            Compose
+          </button>
         </div>
+        {headingToolbarMain}
       </section>
     );
   }
@@ -367,15 +456,22 @@ class MailApp extends Component {
       isLoggedIn = true;
     }
 
+    var headingToolbarType;
+    if(this.props.params.listType !== undefined) {
+      headingToolbarType = 'list';
+    }
+
     var isLoggedInToolbar = null,
         isLoggedInLeftColumn = null;
     if(isLoggedIn){
-      isLoggedInToolbar = <HeadingToolbar />;
+      isLoggedInToolbar = <HeadingToolbar headingToolbarType={headingToolbarType}/>;
       isLoggedInLeftColumn =
       <div className="AppColumn left">
         <MailCategories />
       </div>;
     }
+
+
 
     return (
       <div className="AppContainer">

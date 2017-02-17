@@ -133,6 +133,10 @@ body {
 	content: "\f040";
 }
 
+.Messages-actions-back::before {
+	content: "\f177";
+}
+
 .Button {
 	border: 0;
 	border-radius: 0.2rem;
@@ -218,7 +222,7 @@ body {
 	color: #565656;
 }
 
-.MessagesList {
+.MessagesList, .Message {
 	width: 100%;
 	padding-right: 1rem;
 	overflow-y: scroll;
@@ -283,4 +287,34 @@ body {
 	padding: 1rem 2rem;
 	color: #fff;
 	font-size: 1.2rem;
+}
+
+.Message {
+	margin-right: 2rem;
+}
+
+.MessageContainer {
+	margin-top: 2rem;
+	background-color: #fff;
+	border-radius: 0.2rem;
+	max-width: 100%;
+}
+
+.MessageContainer-header {
+	display: flex;
+	flex-direction: column;
+}
+
+.MessageContainer-header-top, .MessageContainer-header-bottom, .MessageContainer-content {
+	padding: 2rem;
+}
+
+.MessageContainer-header-top{
+	border-bottom: 1px solid rgba(100, 100, 100, 0.1);
+}
+
+.MessageContainer-header-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 }
