@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Router, Route, browserHistory } from '../node_modules/react-router';
-// import Moment from 'react-moment';
+import { Router, Route, browserHistory, Link } from '../node_modules/react-router';
+var classNames = require('classnames');
 var moment = require('moment');
 import 'moment/locale/fr';
 moment.locale('fr');
@@ -25,13 +25,7 @@ function handleAuthClick(event) {
   gapi.auth2.getAuthInstance().signIn();
 }
 function updateSigninStatus(isSignedIn) {
-  // if (isSignedIn) {
-  //   browserHistory.push('/inbox');
-  //   console.log('logged in');
-  // } else {
-  //   browserHistory.push('/');
-  //   console.log('logged out');
-  // }
+
   if (isSignedIn) {
     console.log('logged in');
     console.log(browserHistory.getCurrentLocation());
@@ -48,7 +42,22 @@ function updateSigninStatus(isSignedIn) {
 class GoogleSign extends Component {
   render() {
     return (
-      <button id="googleSignIn" className="btn waves-effect waves-light" onClick={handleAuthClick}>Sign-in with google</button>
+      <div className="GoogleSignIn">
+        <button className="GoogleSignIn-button Button" onClick={handleAuthClick}>Sign-in with google</button>
+      </div>
+    );
+  }
+}
+
+class Message extends Component {
+  constructor() {
+    super();
+
+  }
+  render() {
+    console.log(this.props);
+    return (
+        <div>hello world</div>
     );
   }
 }
@@ -61,12 +70,24 @@ class MessageLine extends Component {
     return formattedDate;
   }
   render() {
+    let that = this;
+    var MessageLineClasses = classNames(
+      'MessageLine',
+      {
+        'unread': that.props.unread,
+      }
+    );
     return (
-      <tr className="messageLine">
-          <td>{this.props.headers.from.name}</td>
-          <td>{this.props.headers.subject}</td>
-          <td>{this.formatDate(this.props.headers.date)}</td>
-      </tr>
+      <div className={MessageLineClasses}>
+        <div className="MessageLine-select">
+          <input type="checkbox" className="MessageLine-select-input" />
+        </div>
+        <div className="MessageLine-content">
+          <span className="MessageLine-sender">{this.props.headers.from.name}</span>
+          <span className="MessageLine-subject">{this.props.headers.subject}</span>
+          <span className="MessageLine-date">{this.formatDate(this.props.headers.date)}</span>
+        </div>
+      </div>
     );
   }
 }
@@ -79,16 +100,28 @@ class MessagesList extends Component {
       }
   }
   componentDidMount() {
-    this.getMessagesList(this.props.params.listType).then((messages) => {
+    this.setStateMessages(this.props.params.listType);
+  }
+  componentWillReceiveProps(nextProps) {
+    this.setStateMessages(nextProps.params.listType);
+  }
+  setStateMessages(listType) {
+    this.getMessagesList(listType).then((messages) => {
       console.log(messages);
       this.setState({messages: messages});
       console.log(this.state);
     });
   }
-  displayMessages() {
-    var messageLines = this.state.messages.map(function(message, index) {
+  displayMessage(id) {
+    return () => {
       console.log('display');
-      return <MessageLine {...message} key={index} />;
+      browserHistory.push('/message/'+ id);
+    }
+  }
+  displayMessagesList() {
+    let that = this;
+    var messageLines = this.state.messages.map(function(message, index) {
+      return <Link to={'/message/'+ index} key={index}><MessageLine {...message} key={message.id} /></Link>;
     });
     return messageLines;
   }
@@ -128,6 +161,9 @@ class MessagesList extends Component {
         }
         return messageHeaders;
       }, {});
+      if(messageObject.labelIds.indexOf('UNREAD') > -1){
+        formattedMessage.unread = true;
+      }
       return formattedMessage;
     });
   }
@@ -142,14 +178,152 @@ class MessagesList extends Component {
   }
   render() {
     return (
-      <section>
-        <h2>Messages</h2>
-          <table className="messages-table highlight responsive-table bordered">
-            <tbody>
-              {this.displayMessages()}
-            </tbody>
-          </table>
+        <main className="MessagesList">
+              {this.displayMessagesList()}
+        </main>
+    );
+  }
+}
+
+class MailCategories extends Component {
+  render() {
+    return (
+      // <nav className="MailCategories">
+      //   <div className="MailCategories-group">
+      //     <a href="#" className="MailCategories-link">Primary (1)</a>
+      //     <a href="#" className="MailCategories-link">Social</a>
+      //     <a href="#" className="MailCategories-link">Promotions</a>
+      //   </div>
+      //   <div className="MailCategories-group">
+      //     <a href="#" className="MailCategories-link">Starred</a>
+      //     <a href="#" className="MailCategories-link">Sent emails</a>
+      //     <a href="#" className="MailCategories-link">Drafts</a>
+      //   </div>
+      //   <div className="MailCategories-group">
+      //     <a href="#" className="MailCategories-link">Spam</a>
+      //     <a href="#" className="MailCategories-link">Bin</a>
+      //   </div>
+      // </nav>
+      <nav className="MailCategories">
+        <div className="MailCategories-group">
+          <Link to="/list/inbox" className="MailCategories-link" activeClassName="active">Inbox</Link>
+          <Link to="/list/sent" className="MailCategories-link" activeClassName="active">Sent</Link>
+        </div>
+        <div className="MailCategories-group">
+          <a href="#" className="MailCategories-link">Starred</a>
+          <a href="#" className="MailCategories-link">Sent emails</a>
+          <a href="#" className="MailCategories-link">Drafts</a>
+        </div>
+        <div className="MailCategories-group">
+          <a href="#" className="MailCategories-link">Spam</a>
+          <a href="#" className="MailCategories-link">Bin</a>
+        </div>
+      </nav>
+    );
+  }
+}
+
+class HeadingToolbar extends Component {
+  render() {
+    return (
+      <section className="HeadingToolbar Wrapper">
+        <div className="AppColumn left">
+          <button type="button" name="button" className="HeadingToolbar-composeEmail Button action">
+            Compose
+          </button>
+        </div>
+        <div className="HeadingToolbar-column AppColumn main row">
+          <div className="HeadingToolbar-selectAll">
+            <input type="checkbox" name="SelectAll" />
+          </div>
+          <div className="HeadingToolbar-paging Paging">
+            <span className="Paging-actualMessages">
+              1 - 50
+            </span>
+            <span className="Paging-of">&nbsp;of&nbsp;</span>
+            <span className="Paging-totalMessages">90</span>
+            <nav className="Paging-PagingNav Paging-nav">
+              <a href="#" className="PagingNav-prev">&lt;</a>
+              <a href="#" className="PagingNav-next">&gt;</a>
+            </nav>
+          </div>
+        </div>
       </section>
+    );
+  }
+}
+
+class Account extends Component {
+  constructor() {
+    super();
+    this.state = {
+      account: {}
+    }
+  }
+  componentDidMount() {
+    const account = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
+    this.setState({account: account});
+  }
+  getImgUrl() {
+    return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getImageUrl();
+  }
+  getUserName() {
+    return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName();
+  }
+  getUserEmail() {
+    return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
+  }
+  signOut() {
+    gapi.auth2.getAuthInstance().signOut();
+  }
+  render() {
+    return (
+      <div className="Account">
+        <img src={this.getImgUrl()} alt="Account" className="Account-image" />
+        <div className="Account-perso Perso">
+          <div className="Perso-name">
+            {this.getUserName()}
+          </div>
+          <div className="Perso-email">
+            {this.getUserEmail()}
+          </div>
+          <a className="Perso-signout" href="#" onClick={this.signOut}>Sign out</a>
+        </div>
+      </div>
+    );
+  }
+}
+
+class Headbar extends Component {
+  render() {
+    var isLoggedInContent = ' ';
+    if(this.props.isLoggedIn) {
+      isLoggedInContent =
+        <div className="AppColumn main row">
+          <div className="Headbar-searchbar">
+            <input type="text" className="Searchbar" />
+          </div>
+          <div className="Headbar-account">
+            <Account />
+          </div>
+        </div>;
+    }
+
+
+    return (
+      <header className="Headbar Wrapper">
+        <div className="AppColumn left">
+          <div className="Headbar-logo Logo">
+            <div className="Logo-icon">
+
+            </div>
+            <h1 className="Logo-text">
+              Mail
+            </h1>
+          </div>
+        </div>
+        {isLoggedInContent}
+      </header>
 
     );
   }
@@ -159,15 +333,16 @@ class MailApp extends Component {
   constructor() {
     super();
     this.state = {
-        messages: [],
         googleAPILoading: true,
     }
-
   }
   componentDidMount() {
     gapi.load('client:auth2', () => {
         this.initClient()
     });
+  }
+  test() {
+    console.log('test');
   }
   initClient() {
     gapi.client.init({
@@ -187,30 +362,49 @@ class MailApp extends Component {
     if (this.state.googleAPILoading) {
       return null;
     }
+    var isLoggedIn = false;
+    if(this.props.location.pathname !== '/') {
+      isLoggedIn = true;
+    }
+
+    var isLoggedInToolbar = null,
+        isLoggedInLeftColumn = null;
+    if(isLoggedIn){
+      isLoggedInToolbar = <HeadingToolbar />;
+      isLoggedInLeftColumn =
+      <div className="AppColumn left">
+        <MailCategories />
+      </div>;
+    }
+
     return (
-      <main className="main-layout">
-        <nav>
-          <div className="nav-wrapper">
-            <a href="#" className="brand-logo">Logo</a>
-            <ul id="nav-mobile" className="right hide-on-med-and-down">
-              <li><a href="/list/inbox">Messages reçus</a></li>
-              <li><a href="/list/sent">Messages envoyés</a></li>
-            </ul>
+      <div className="AppContainer">
+        <Headbar isLoggedIn={isLoggedIn}/>
+        {isLoggedInToolbar}
+
+        <section className="MainSection Wrapper no-right">
+          {isLoggedInLeftColumn}
+
+          <div className="AppColumn main">
+
+                {this.props.children}
+
           </div>
-        </nav>
-        <div className="mail-app">
-          {this.props.children}
-        </div>
-      </main>
+
+        </section>
+
+      </div>
     );
   }
 }
 
+
 const Routes = (props) => (
   <Router {...props}>
-    <Route component={MailApp} >
+    <Route component={MailApp}>
       <Route path="/" component={GoogleSign} />
       <Route path="/list/:listType" component={MessagesList} />
+      <Route path="/message/:messageId" component={Message} />
     </Route>
   </Router>
 );
