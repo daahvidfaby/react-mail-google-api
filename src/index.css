@@ -94,6 +94,10 @@ body {
 	align-items: center;
 }
 
+.Logo-icon {
+	height: 100%;
+}
+
 .Logo-icon img {
 	display: block;
 	height: 100%;
@@ -224,8 +228,8 @@ body {
 .MailCategories-group {
 	display: flex;
 	flex-direction: column;
-	padding: 1rem 0;
-	margin-bottom: 1rem;
+	padding: 0.8rem 0;
+	margin-bottom: 0.8rem;
 	border-bottom: 1px solid rgba(159, 159, 159, 0.5);
 }
 
@@ -250,6 +254,20 @@ body {
 
 .MailCategories-link:hover {
 	color: #565656;
+}
+
+.MailCategories-link::before {
+	font-family: 'FontAwesome';
+	margin-right: 1rem;
+	font-size: 1rem;
+}
+
+.MailCategories-link.inbox::before {
+	content: "\f01c";
+}
+
+.MailCategories-link.sent::before {
+	content: "\f1d8";
 }
 
 .MessagesList, .Message {

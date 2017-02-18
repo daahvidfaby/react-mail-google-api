@@ -70,15 +70,16 @@ class MessageCompose extends Component {
       case 'content':
         this.setState({content: e.target.value});
         break;
+      default:
+        return false;
     }
 
   }
   handleSubmit(e) {
     e.preventDefault();
     console.log(this.state);
-    var receiver    = 'theReceiverEmail@hotmail.com';
-    var to          = 'To: '   + '"' + this.state.receiverName + '" <' + this.state.receiverEmail + '>';
-    var from        = 'From: ' + '"' +  gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName() + '" <' + gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail() + '>';
+    var to          = 'To: "' + this.state.receiverName + '" <' + this.state.receiverEmail + '>';
+    var from        = 'From: "' +  gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName() + '" <' + gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail() + '>';
     var subject     = 'Subject: ' + this.state.subject;
     var contentType = 'Content-Type: text/plain; charset=utf-8';
     var mime        = 'MIME-Version: 1.0';
@@ -414,8 +415,8 @@ class MailCategories extends Component {
       // </nav>
       <nav className="MailCategories">
         <div className="MailCategories-group">
-          <Link to="/list/inbox" className="MailCategories-link" activeClassName="active">Inbox</Link>
-          <Link to="/list/sent" className="MailCategories-link" activeClassName="active">Sent</Link>
+          <Link to="/list/inbox" className="MailCategories-link inbox" activeClassName="active">Inbox</Link>
+          <Link to="/list/sent" className="MailCategories-link sent" activeClassName="active">Sent</Link>
         </div>
         <div className="MailCategories-group">
           <a href="#" className="MailCategories-link">Starred</a>
@@ -548,7 +549,7 @@ class Headbar extends Component {
         <div className="AppColumn left">
           <div className="Headbar-logo Logo">
             <div className="Logo-icon">
-              <img src={logo} />
+              <img src={logo} alt="Logo"/>
             </div>
             <h1 className="Logo-text">
               FMail
