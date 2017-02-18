@@ -9,7 +9,6 @@ import './App.css';
 import './assets/js/gapi';
 const gapi = window.gapi;
 const iframely = window.iframely;
-var Frame = require('react-frame');
 
 
 // Client ID and API key from the Developer Console
@@ -51,6 +50,105 @@ class GoogleSign extends Component {
   }
 }
 
+class MessageCompose extends Component {
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  handleChange(e) {
+    switch (e.target.name) {
+      case 'receiver-name':
+        this.setState({receiverName: e.target.value});
+        break;
+      case 'receiver-email':
+        this.setState({receiverEmail: e.target.value});
+        break;
+      case 'subject':
+        this.setState({subject: e.target.value});
+        break;
+      case 'content':
+        this.setState({content: e.target.value});
+        break;
+    }
+
+  }
+  handleSubmit(e) {
+    e.preventDefault();
+    console.log(this.state);
+    var receiver    = 'theReceiverEmail@hotmail.com';
+    var to          = 'To: '   + '"' + this.state.receiverName + '" <' + this.state.receiverEmail + '>';
+    var from        = 'From: ' + '"' +  gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName() + '" <' + gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail() + '>';
+    var subject     = 'Subject: ' + this.state.subject;
+    var contentType = 'Content-Type: text/plain; charset=utf-8';
+    var mime        = 'MIME-Version: 1.0';
+
+    var message = "";
+    message +=   to             +"\r\n";
+    message +=   from           +"\r\n";
+    message +=   subject        +"\r\n";
+    message +=   contentType    +"\r\n";
+    message +=   mime           +"\r\n";
+    message +=    "\r\n"        + this.state.content;
+
+    this.sendMessage(message);
+
+  }
+  sendMessage(message) {
+    var base64EncodedEmail = btoa(message).replace(/\+/g, '-').replace(/\//g, '_');
+    gapi.client.gmail.users.messages.send({
+      'userId': 'me',
+      'resource': {
+        'raw': base64EncodedEmail
+      }
+    })
+    .then((result) => {
+      console.log(result);
+      browserHistory.push('/list/sent')
+    });
+  }
+  render() {
+    return (
+      <main className="Message">
+
+        <div className="MessageContainer">
+          <form onSubmit={this.handleSubmit} className="MessageComposeForm">
+            <div className="MessageContainer-header">
+              <div className="MessageContainer-header-top">
+                <div className="Receiver">
+                  <h2 className="Receiver-title">To</h2>
+                  <div className="Receiver-name">
+                    <input type="text" name="receiver-name" className="Receiver-name-input Message-input" placeholder="Name" onChange={this.handleChange}/>
+                  </div>
+                  <div className="Sender-email">
+                    <input type="text" name="receiver-email" className="Receiver-email-input Message-input" placeholder="E-mail" onChange={this.handleChange}/>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div className="MessageContainer-header-bottom">
+              <div className="Subject">
+                <input type="text" name="subject" className="Subject-input Message-input" placeholder="Subject" onChange={this.handleChange}/>
+              </div>
+            </div>
+            <div className="MessageContainer-content">
+
+
+              <textarea name="content" className="Content-input Message-input" placeholder="Your content" onChange={this.handleChange} ></textarea>
+
+            </div>
+            <div className="MessageContainer-footer">
+              <input type="submit" className="Button" value="Envoyer" />
+            </div>
+          </form>
+        </div>
+      </main>
+    );
+  }
+
+}
+
 class Message extends Component {
   constructor() {
     super();
@@ -82,6 +180,9 @@ class Message extends Component {
       'userId': 'me',
       'id': messageId,
       'removeLabelIds': ['UNREAD']
+    })
+    .then(() => {
+      return true;
     })
   }
   getMessage(messagesId) {
@@ -136,9 +237,6 @@ class Message extends Component {
     }
     return (
       <main className="Message">
-        <div className="Message-actions">
-          <button type="button" name="back" className="Messages-actions-back Button action" onClick={browserHistory.goBack}>Retour</button>
-        </div>
         <div className="MessageContainer">
           <div className="MessageContainer-header">
             <div className="MessageContainer-header-top">
@@ -354,15 +452,33 @@ class HeadingToolbar extends Component {
             </nav>
           </div>
         </div>;
+    } else {
+      headingToolbarMain =
+        <div className="HeadingToolbar-column AppColumn main row">
+          <div className="HeadingToolbar-goBack">
+            <button type="button" name="back" className="HeadingToolbar-goBack-button Button" onClick={browserHistory.goBack}></button>
+          </div>
+          <div className="HeadingToolbar-paging Paging">
+            <span className="Paging-actualMessages">
+              1 - 50
+            </span>
+            <span className="Paging-of">&nbsp;of&nbsp;</span>
+            <span className="Paging-totalMessages">90</span>
+            <nav className="Paging-PagingNav Paging-nav">
+              <a href="#" className="PagingNav-prev">&lt;</a>
+              <a href="#" className="PagingNav-next">&gt;</a>
+            </nav>
+          </div>
+        </div>;
     }
 
     console.log(this.props);
     return (
       <section className="HeadingToolbar Wrapper">
         <div className="AppColumn left">
-          <button type="button" name="button" className="HeadingToolbar-composeEmail Button action">
+          <Link to="/compose" className="HeadingToolbar-composeEmail Button action">
             Compose
-          </button>
+          </Link>
         </div>
         {headingToolbarMain}
       </section>
@@ -432,10 +548,10 @@ class Headbar extends Component {
         <div className="AppColumn left">
           <div className="Headbar-logo Logo">
             <div className="Logo-icon">
-
+              <img src={logo} />
             </div>
             <h1 className="Logo-text">
-              Mail
+              FMail
             </h1>
           </div>
         </div>
@@ -529,6 +645,7 @@ const Routes = (props) => (
       <Route path="/" component={GoogleSign} />
       <Route path="/list/:listType" component={MessagesList} />
       <Route path="/message/:messageId" component={Message} />
+      <Route path="/compose" component={MessageCompose} />
     </Route>
   </Router>
 );
