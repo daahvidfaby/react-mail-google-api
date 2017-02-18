@@ -8,6 +8,8 @@ import logo from './logo.svg';
 import './App.css';
 import './assets/js/gapi';
 const gapi = window.gapi;
+const iframely = window.iframely;
+var Frame = require('react-frame');
 
 
 // Client ID and API key from the Developer Console
@@ -48,6 +50,31 @@ class GoogleSign extends Component {
     );
   }
 }
+//
+// var Frame = React.createClass({
+//
+//   render: function() {
+//     return <iframe />;
+//   },
+//   renderFrameContents: function() {
+//     console.log(this);
+//     var doc = this.getDOMNode().contentDocument;
+//     if(doc.readyState === 'complete') {
+//        React.renderComponent(this.props.children, doc.body);
+//     } else {
+//        setTimeout(this.renderFrameContents, 0);
+//     }
+//   },
+//   componentDidMount: function() {
+//     this.renderFrameContents();
+//   },
+//   componentDidUpdate: function() {
+//     this.renderFrameContents();
+//   },
+//   componentWillUnmount: function() {
+//     React.unmountComponentAtNode(this.getDOMNode().contentDocument.body);
+//   }
+// });
 
 class Message extends Component {
   constructor() {
@@ -66,6 +93,15 @@ class Message extends Component {
     .then((formattedMessage) => {
       this.setState({message: formattedMessage, messageLoaded: true});
     });
+    window.iframely && iframely.load();
+  }
+  getIframelyHtml() {
+    // If you use embed code from API
+    return {__html: this.getMessageContent()};
+
+    // Alternatively, if you use plain embed.js approach without API calls:
+    // return {__html: '<a href="' + this.url + '" data-iframely-url></a>'};
+    // no title inside <a> eliminates the flick
   }
   getMessage(messagesId) {
     return gapi.client.gmail.users.messages.get({
@@ -94,7 +130,7 @@ class Message extends Component {
   getMessageContent() {
     let htmlContent;
     if(this.state.message.payload.body.size === 0){
-      htmlContent = this.b64DecodeUnicode(this.state.message.payload.parts[0].body.data.replace(/-/g, '+').replace(/_/g, '/'));
+      htmlContent = this.b64DecodeUnicode(this.state.message.payload.parts[1].body.data.replace(/-/g, '+').replace(/_/g, '/'));
     } else {
       htmlContent = this.b64DecodeUnicode(this.state.message.payload.body.data.replace(/-/g, '+').replace(/_/g, '/'));
     }
@@ -136,7 +172,10 @@ class Message extends Component {
             </div>
           </div>
           <div className="MessageContainer-content">
-            {this.getMessageContent()}
+
+
+            <div dangerouslySetInnerHTML={this.getIframelyHtml()} />
+
           </div>
         </div>
       </main>

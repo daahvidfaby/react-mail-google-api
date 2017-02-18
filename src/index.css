@@ -241,6 +241,13 @@ body {
 	font-size: 0.9rem;
 }
 
+.MessageLine:hover {
+	margin-top: -1px;
+	margin-bottom: calc(0.5rem + 1px);
+	box-shadow: 0 3px 5px rgba(100,100,100,0.1);
+	background-color: #f1f1f1;
+}
+
 .MessageLine.unread, .MessageLine.unread .MessageLine-sender {
 	color: #6f6f6f;
 }
