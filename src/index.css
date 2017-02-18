@@ -250,6 +250,7 @@ body {
 
 .MessageLine.unread, .MessageLine.unread .MessageLine-sender {
 	color: #6f6f6f;
+	font-weight: 500;
 }
 
 .MessageLine-content {
