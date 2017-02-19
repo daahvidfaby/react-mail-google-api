@@ -621,7 +621,7 @@ class MailApp extends Component {
       </div>;
     }
 
-
+    console.log('HELLO WORLD');
 
     return (
       <div className="AppContainer">
