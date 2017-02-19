@@ -442,6 +442,7 @@ class MailCategories extends Component {
 
 class HeadingToolbar extends Component {
   render() {
+    console.log(this.props);
     var headingToolbarMain;
     if(this.props.headingToolbarType === 'list') {
       headingToolbarMain =
@@ -466,6 +467,9 @@ class HeadingToolbar extends Component {
         <div className="HeadingToolbar-column AppColumn main row">
           <div className="HeadingToolbar-goBack">
             <button type="button" name="back" className="HeadingToolbar-goBack-button Button" onClick={browserHistory.goBack}></button>
+          </div>
+          <div className="HeadingToolbar-text">
+            <h2>{this.props.headingToolbarText}</h2>
           </div>
           <div className="HeadingToolbar-paging Paging">
             <span className="Paging-actualMessages">
@@ -606,22 +610,24 @@ class MailApp extends Component {
       isLoggedIn = true;
     }
 
-    var headingToolbarType;
+    var headingToolbarType, headingToolbarText;
     if(this.props.params.listType !== undefined) {
       headingToolbarType = 'list';
+    } else {
+      headingToolbarText = this.props.params.messageId;
     }
 
     var isLoggedInToolbar = null,
         isLoggedInLeftColumn = null;
     if(isLoggedIn){
-      isLoggedInToolbar = <HeadingToolbar headingToolbarType={headingToolbarType}/>;
+      isLoggedInToolbar = <HeadingToolbar headingToolbarType={headingToolbarType} headingToolbarText={headingToolbarText}/>;
       isLoggedInLeftColumn =
       <div className="AppColumn left">
         <MailCategories />
       </div>;
     }
 
-    console.log('HELLO WORLD');
+
 
     return (
       <div className="AppContainer">
