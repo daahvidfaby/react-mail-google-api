@@ -199,10 +199,12 @@ body {
 .AppColumn.left {
 	width: 14rem;
 	padding-right: 5rem;
+	flex-shrink: 0;
 }
 
 .AppColumn.main {
   flex: 1;
+	overflow: hidden;
 }
 
 .AppColumn.row {
@@ -274,6 +276,7 @@ body {
 	width: 100%;
 	padding-right: 1rem;
 	overflow-y: scroll;
+	overflow-x: hidden;
 }
 
 
@@ -306,6 +309,7 @@ body {
 	flex: 1;
 	justify-content: space-between;
 	align-items: center;
+	overflow: hidden;
 }
 
 .MessageLine-select {
@@ -322,9 +326,14 @@ body {
 
 .MessageLine-subject {
 	flex: 0.9;
+	min-width: 0;
 }
 
-.MessageLine-sender{
+.MessageLine-date {
+	white-space: nowrap;
+}
+
+.MessageLine-sender, .MessageLine-subject p{
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	overflow: hidden;

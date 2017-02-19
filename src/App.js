@@ -293,7 +293,7 @@ class MessageLine extends Component {
         </div>
         <div className="MessageLine-content">
           <span className="MessageLine-sender">{this.props.headers.from.name}</span>
-          <span className="MessageLine-subject">{this.props.headers.subject}</span>
+          <span className="MessageLine-subject"><p>{this.props.headers.subject}</p></span>
           <span className="MessageLine-date">{this.formatDate(this.props.headers.date)}</span>
         </div>
       </div>
@@ -443,7 +443,7 @@ class HeadingToolbar extends Component {
           </div>
           <div className="HeadingToolbar-paging Paging">
             <span className="Paging-actualMessages">
-              1 - 50
+              1 - 20
             </span>
             <span className="Paging-of">&nbsp;of&nbsp;</span>
             <span className="Paging-totalMessages">90</span>
