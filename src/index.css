@@ -275,7 +275,7 @@ body {
 .MessagesList, .Message {
 	width: 100%;
 	padding-right: 1rem;
-	overflow-y: scroll;
+	overflow-y: auto;
 	overflow-x: hidden;
 }
 

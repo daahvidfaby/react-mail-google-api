@@ -103,8 +103,8 @@ class MessageCompose extends Component {
         'raw': base64EncodedEmail
       }
     })
-    .then((result) => {
-      console.log(result);
+    .then((ressource) => {
+      console.log(ressource);
       browserHistory.push('/list/sent')
     });
   }
@@ -186,13 +186,13 @@ class Message extends Component {
       return true;
     })
   }
-  getMessage(messagesId) {
+  getMessage(messageId) {
     return gapi.client.gmail.users.messages.get({
       'userId': 'me',
-      'id': messagesId,
+      'id': messageId,
     })
-    .then(messageResult => {
-      return messageResult.result;
+    .then(ressource => {
+      return ressource.result;
     });
   }
   formatMessageObject(messageObject) {
@@ -260,7 +260,6 @@ class Message extends Component {
             </div>
           </div>
           <div className="MessageContainer-content">
-
 
             <div dangerouslySetInnerHTML={this.getIframelyHtml()} />
 
@@ -338,20 +337,20 @@ class MessagesList extends Component {
       'userId': 'me',
       'maxResults': nb,
       'labelIds': label
-    }).then((messagesIds) => {
-      return messagesIds;
+    }).then((ressource) => {
+      return ressource.result.messages;
     });
   }
   getMessages(messagesIds) {
     console.log(messagesIds);
     return Promise.all(
-      messagesIds.result.messages.map(function(message) {
+      messagesIds.map(function(message) {
         return gapi.client.gmail.users.messages.get({
           'userId': 'me',
           'id': message.id,
           'format': 'metadata'
-        }).then(function(messages) {
-          return messages.result;
+        }).then(function(ressource) {
+          return ressource.result;
         })
       })
     );
@@ -395,7 +394,16 @@ class MessagesList extends Component {
 }
 
 class MailCategories extends Component {
+  getLabelsList() {
+  gapi.client.gmail.users.labels.list({
+    'userId': 'me'
+    })
+    .then(ressource => {
+      console.log(ressource.result.labels);
+    });
+  }
   render() {
+    console.log(this.getLabelsList());
     return (
       // <nav className="MailCategories">
       //   <div className="MailCategories-group">
@@ -574,9 +582,6 @@ class MailApp extends Component {
     gapi.load('client:auth2', () => {
         this.initClient()
     });
-  }
-  test() {
-    console.log('test');
   }
   initClient() {
     gapi.client.init({
