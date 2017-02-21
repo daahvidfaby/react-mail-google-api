@@ -600,14 +600,16 @@ class MailApp extends Component {
     if (this.props.params.listType !== undefined) {
       headingToolbarType='list';
     } else {
-      headingToolbarText = this.state.actualMessage.headers.subject;
+      if(this.props.location.pathname !== '/') {
+        headingToolbarText = this.state.actualMessage.headers.subject;
+      }
     }
 
     var isLoggedInToolbar = null,
       isLoggedInLeftColumn = null;
     if (isLoggedIn) {
       isLoggedInToolbar =
-        <HeadingToolbar headingToolbarType={headingToolbarType} headingToolbarText={headingToolbarText} />;
+        <HeadingToolbar type={headingToolbarType} text={headingToolbarText} />;
       isLoggedInLeftColumn =
         <div className="AppColumn left">
           <MailCategories />
