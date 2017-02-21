@@ -149,6 +149,10 @@ body {
 	font-size: 0.9rem;
 }
 
+.HeadingToolbar-text {
+  flex: 1;
+}
+
 .HeadingToolbar-goBack-button {
 	background-color: transparent;
 	font-size: 1.4rem;
@@ -165,10 +169,6 @@ body {
 
 .HeadingToolbar-composeEmail::before {
 	content: "\f040";
-}
-
-.Messages-actions-back::before {
-	content: "\f177";
 }
 
 .Button {
@@ -275,7 +275,7 @@ body {
 .MessagesList, .Message {
 	width: 100%;
 	padding-right: 1rem;
-	overflow-y: auto;
+	overflow-y: auto;;
 	overflow-x: hidden;
 }
 
