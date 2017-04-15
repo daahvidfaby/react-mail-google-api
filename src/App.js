@@ -24,7 +24,9 @@ var SCOPES = 'https://mail.google.com/';
 
 
 function handleAuthClick(event) {
-  gapi.auth2.getAuthInstance().signIn();
+  var options = new gapi.auth2.SigninOptionsBuilder();
+  options.setPrompt('select_account');
+  gapi.auth2.getAuthInstance().signIn(options);
 }
 
 function updateSigninStatus(isSignedIn) {
@@ -393,22 +395,6 @@ class MailCategories extends Component {
   render() {
     this.getLabelsList();
     return (
-      // <nav className="MailCategories">
-      //   <div className="MailCategories-group">
-      //     <a href="#" className="MailCategories-link">Primary (1)</a>
-      //     <a href="#" className="MailCategories-link">Social</a>
-      //     <a href="#" className="MailCategories-link">Promotions</a>
-      //   </div>
-      //   <div className="MailCategories-group">
-      //     <a href="#" className="MailCategories-link">Starred</a>
-      //     <a href="#" className="MailCategories-link">Sent emails</a>
-      //     <a href="#" className="MailCategories-link">Drafts</a>
-      //   </div>
-      //   <div className="MailCategories-group">
-      //     <a href="#" className="MailCategories-link">Spam</a>
-      //     <a href="#" className="MailCategories-link">Bin</a>
-      //   </div>
-      // </nav>
       <nav className="MailCategories">
         <div className="MailCategories-group">
           <Link to="/list/inbox" className="MailCategories-link inbox" activeClassName="active">Inbox</Link>
@@ -431,7 +417,7 @@ class MailCategories extends Component {
 class HeadingToolbar extends Component {
   render() {
     var headingToolbarMain;
-    if (this.props.headingToolbarType === 'list') {
+    if (this.props.type === 'list') {
       headingToolbarMain =
         <div className="HeadingToolbar-column AppColumn main row">
           <div className="HeadingToolbar-selectAll">
@@ -454,7 +440,7 @@ class HeadingToolbar extends Component {
             <button type="button" name="back" className="HeadingToolbar-goBack-button Button" onClick={browserHistory.goBack}></button>
           </div>
           <div className="HeadingToolbar-text">
-            <h2>{this.props.headingToolbarText}</h2>
+            <h2>{this.props.text}</h2>
           </div>
           <div className="HeadingToolbar-paging Paging">
             <span className="Paging-actualMessages">1 - 50</span>
