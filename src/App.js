@@ -7,7 +7,6 @@ import 'moment/locale/fr';
 moment.locale('fr');
 import logo from './logo.svg';
 import './App.css';
-import './assets/js/gapi';
 const gapi = window.gapi;
 const iframely = window.iframely;
 
