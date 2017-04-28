@@ -7,34 +7,18 @@ import 'moment/locale/fr';
 moment.locale('fr');
 import logo from './logo.svg';
 import './App.css';
+
+import UserApi from './services/UserApi';
+
 const gapi = window.gapi;
 const iframely = window.iframely;
 
 
-// Client ID and API key from the Developer Console
-var CLIENT_ID = '345060820385-g40i755r2pslhiekg5amgrnitiigp6r6.apps.googleusercontent.com';
-
-// Array of API discovery doc URLs for APIs used by the quickstart
-var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest"];
-
-// Authorization scopes required by the API; multiple scopes can be
-// included, separated by spaces.
-var SCOPES = 'https://mail.google.com/';
 
 
-function handleAuthClick(event) {
-  var options = new gapi.auth2.SigninOptionsBuilder();
-  options.setPrompt('select_account');
-  gapi.auth2.getAuthInstance().signIn(options);
-}
-
-function updateSigninStatus(isSignedIn) {
-
-  if (isSignedIn) {
-    console.log('logged in');
-    console.log(browserHistory.getCurrentLocation());
+function updateSigninStatus() {
+  if (UserApi.getSignInStatus() === true) {
     if (browserHistory.getCurrentLocation().pathname === '/') {
-      console.log('signin');
       browserHistory.push('/list/inbox');
     }
   } else {
@@ -43,19 +27,26 @@ function updateSigninStatus(isSignedIn) {
   }
 }
 
-class GoogleSign extends Component {
-  render() {
+function GoogleSign() {
     return (
       <div className="GoogleSignIn">
-        <button className="GoogleSignIn-button Button" onClick={handleAuthClick}>Sign-in with google</button>
+        <button className="GoogleSignIn-button Button" onClick={UserApi.getSignInPopUp}>Sign-in with google</button>
       </div>
     );
-  }
-}
+} 
 
 class MessageCompose extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      senderName: UserApi.getUserProfile().name,
+      senderEmail: UserApi.getUserProfile().email,
+      receiverName: undefined,
+      receiverEmail: undefined,
+      subject: undefined,
+      content: undefined,
+    }
+    
     this.handleChange=this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -90,7 +81,7 @@ class MessageCompose extends Component {
     e.preventDefault();
     console.log(this.state);
     var to='To: "' + this.state.receiverName + '" <' + this.state.receiverEmail + '>';
-    var from = 'From: "' + gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName() + '" <' + gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail() + '>';
+    var from = 'From: "' + this.state.senderName + '" <' +this.state.senderEmail + '>';
     var subject = 'Subject: ' + this.state.subject;
     var contentType='Content-Type: text/plain; charset=utf-8';
     var mime='MIME-Version: 1.0';
@@ -278,10 +269,8 @@ class MessageLine extends Component {
     this.handleDisplay = this.handleDisplay.bind(this);
   }
   formatDate(dateString) {
-    let date=new Date(dateString);
-    let formattedDate=moment(date.getTime()).format('D MMM');
-    console.log(formattedDate);
-    return formattedDate;
+    const date = new Date(dateString);
+    return moment(date.getTime()).format('D MMM');
   }
   handleDisplay() {
     this.props.handleDisplay(this.props.message)
@@ -468,34 +457,26 @@ class Account extends Component {
   constructor() {
     super();
     this.state={
-      account: {}
+      userProfile: {}
     }
   }
   componentDidMount() {
-    const account = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
+    const userProfile = UserApi.getUserProfile();
     this.setState({
-      account: account
+      userProfile: userProfile
     });
   }
-  getImgUrl() {
-    return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getImageUrl();
-  }
-  getUserName() {
-    return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName();
-  }
-  getUserEmail() {
-    return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
-  }
   signOut() {
-    gapi.auth2.getAuthInstance().signOut();
+    return UserApi.signUserOut();
   }
   render() {
+    const userProfile = this.state.userProfile;
     return (
       <div className="Account">
-        <img src={this.getImgUrl()} alt="Account" className="Account-image" />
+        <img src={userProfile.image} alt="Account" className="Account-image" />
         <div className="Account-perso Perso">
-          <div className="Perso-name">{this.getUserName()}</div>
-          <div className="Perso-email">{this.getUserEmail()}</div>
+          <div className="Perso-name">{userProfile.name}</div>
+          <div className="Perso-email">{userProfile.email}</div>
           <a className="Perso-signout" href="#" onClick={this.signOut}> Sign out</a>
         </div>
       </div>
@@ -547,32 +528,21 @@ class MailApp extends Component {
 
   }
   componentDidMount() {
-    var that = this;
-    gapi.load('client:auth2', () => {
-      return this.initClient()
-    });
-  }
-  initClient() {
-    return gapi.client.init({
-      discoveryDocs: DISCOVERY_DOCS,
-      clientId: CLIENT_ID,
-      scope: SCOPES
-    }).then(function () {
-      // Listen for sign-in state changes.
-      gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-      // Handle the initial sign-in state.
-      return updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-    }).then(() => {
-      this.setState({
-        googleAPILoading: false
-      });
+    return UserApi.init()
+    .then(() => {
+      UserApi.listenForUserSignChange(updateSigninStatus);
+    })
+    .then(() => {
+      return this.setState(() => {
+        return { googleAPILoading: false };
+      });  
     });
   }
   storeMessageDisplay(message) {
     this.setState({actualMessage : message});
   }
   render() {
-    console.log(this.state);
+    
     if (this.state.googleAPILoading) {
       return null;
     }
