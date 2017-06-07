@@ -19,6 +19,7 @@ const iframely = window.iframely;
 function updateSigninStatus() {
   if (UserApi.getSignInStatus() === true) {
     if (browserHistory.getCurrentLocation().pathname === '/') {
+      window.location.pathname = '/list/inbox';
       browserHistory.push('/list/inbox');
     }
   } else {
