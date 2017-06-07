@@ -461,9 +461,8 @@ class Account extends Component {
     }
   }
   componentDidMount() {
-    const userProfile = UserApi.getUserProfile();
     this.setState({
-      userProfile: userProfile
+      userProfile: UserApi.getUserProfile()
     });
   }
   signOut() {
