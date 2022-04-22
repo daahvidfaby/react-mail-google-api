@@ -6,7 +6,7 @@ import 'moment/locale/fr';
 moment.locale('fr');
 import logo from './logo.svg';
 import './App.css';
-// import './assets/js/gapi';
+
 const gapi = window.gapi;
 const iframely = window.iframely;
 
@@ -25,6 +25,7 @@ var SCOPES = 'https://mail.google.com/';
 function handleAuthClick(event) {
   gapi.auth2.getAuthInstance().signIn();
 }
+
 function updateSigninStatus(isSignedIn) {
 
   if (isSignedIn) {
@@ -568,16 +569,20 @@ class MailApp extends Component {
     super();
     this.state = {
         googleAPILoading: true,
+        scriptFetched: false
     }
   }
   componentDidMount() {
-    gapi.load('client:auth2', () => {
-        this.initClient()
-    });
+    let loadingInterval = setInterval(() => {
+      if(gapi) {
+        gapi.load('client:auth2', () => {
+          this.initClient()
+        });
+        clearInterval(loadingInterval);
+      }
+    }, 100)
   }
-  test() {
-    console.log('test');
-  }
+
   initClient() {
     gapi.client.init({
       discoveryDocs: DISCOVERY_DOCS,
