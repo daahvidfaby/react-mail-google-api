@@ -34,7 +34,7 @@ class MessagesList extends Component {
 
     displayMessagesList() {
       var messageLines = this.state.messages.map(function(message, index) {
-        return <Link to={'/message/'+ message.id} key={index}><MessageLine {...message} key={message.id} /></Link>;
+        return <div key={index}><MessageLine {...message} key={message.id} /></div>;
       });
       return messageLines;
     }

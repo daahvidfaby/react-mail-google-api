@@ -25,15 +25,6 @@ class MailCategories extends Component {
             <Link to="/list/inbox" className="MailCategories-link inbox" activeClassName="active">Inbox</Link>
             <Link to="/list/sent" className="MailCategories-link sent" activeClassName="active">Sent</Link>
           </div>
-          <div className="MailCategories-group">
-            <a href="#" className="MailCategories-link">Starred</a>
-            <a href="#" className="MailCategories-link">Sent emails</a>
-            <a href="#" className="MailCategories-link">Drafts</a>
-          </div>
-          <div className="MailCategories-group">
-            <a href="#" className="MailCategories-link">Spam</a>
-            <a href="#" className="MailCategories-link">Bin</a>
-          </div>
         </nav>
       );
     }
